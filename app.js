@@ -1,5 +1,4 @@
-        // Get the task input and task list elements
-        const taskInput = document.getElementById("taskInput");
+  const taskInput = document.getElementById("taskInput");
         const taskList = document.getElementById("taskList");
         const historyList = document.getElementById("historyList");
 
