@@ -1,8 +1,16 @@
-// Get the task input and task list elements
+        // Get the task input and task list elements
         const taskInput = document.getElementById("taskInput");
         const taskList = document.getElementById("taskList");
-        const statusElement = document.getElementById("status");
         const historyList = document.getElementById("historyList");
+
+        // Load tasks from local storage
+        let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+
+        // Display tasks
+        tasks.forEach(task => {
+            const taskElement = createTaskElement(task);
+            taskList.appendChild(taskElement);
+        });
 
         // Add event listener to the form
         document.querySelector("form").addEventListener("submit", function(event) {
@@ -20,11 +28,12 @@
                 taskInput.value = "";
 
                 // Add the task to the history list
-                const historyElement = createHistoryElement(taskName);
+                const historyElement = createHistoryElement(`Added task "${taskName}"`);
                 historyList.appendChild(historyElement);
 
-                // Update the status
-                updateStatus();
+                // Update local storage
+                tasks.push(taskName);
+                localStorage.setItem('tasks', JSON.stringify(tasks));
             }
         });
 
@@ -32,7 +41,6 @@
         function createTaskElement(taskName) {
             const taskElement = document.createElement("li");
             taskElement.innerHTML = `
-                <input type="checkbox">
                 <span>${taskName}</span>
                 <div>
                     <button class="edit">Edit</button>
@@ -49,13 +57,6 @@
             const deleteButton = taskElement.querySelector(".delete");
             deleteButton.addEventListener("click", function() {
                 deleteTask(taskElement);
-            });
-
-            // Add event listener to the checkbox
-            const checkbox = taskElement.querySelector("input[type='checkbox']");
-            checkbox.addEventListener("change", function() {
-                taskElement.classList.toggle("completed");
-                updateStatus();
             });
 
             return taskElement;
@@ -78,6 +79,11 @@
                 // Add the task to the history list
                 const historyElement = createHistoryElement(`Edited task "${taskName}" to "${newTaskName.trim()}"`);
                 historyList.appendChild(historyElement);
+
+                // Update local storage
+                const index = tasks.indexOf(taskName);
+                tasks[index] = newTaskName.trim();
+                localStorage.setItem('tasks', JSON.stringify(tasks));
             }
         }
 
@@ -90,13 +96,8 @@
             const historyElement = createHistoryElement(`Deleted task "${taskName}"`);
             historyList.appendChild(historyElement);
 
-            // Update the status
-            updateStatus();
-        }
-
-        // Update the status
-        function updateStatus() {
-            const totalTasks = taskList.children.length;
-            const completedTasks = taskList.querySelectorAll("input[type='checkbox']:checked").length;
-            statusElement.textContent = `Total tasks: ${totalTasks}, Completed tasks: ${completedTasks}`;
+            // Update local storage
+            const index = tasks.indexOf(taskName);
+            tasks.splice(index, 1);
+            localStorage.setItem('tasks', JSON.stringify(tasks));
         }
